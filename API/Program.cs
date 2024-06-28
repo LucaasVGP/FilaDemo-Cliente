@@ -7,7 +7,7 @@ var factory = new ConnectionFactory() { HostName = "localhost" };
 
 var opcao = 0;
 
-while (opcao != 5)
+while (opcao != 6)
 {
 	var opcaoMenu = ExibeMenu();
 
@@ -15,7 +15,7 @@ while (opcao != 5)
 	switch (opcaoMenu)
 	{
 		case 1:
-			EnviarItemFila(factory, "Resultados");
+			EnviarItemFila(factory, "Processar");
 			break;
 		case 2:
 			ExibirItensFila(factory, "Resultados");
@@ -24,6 +24,9 @@ while (opcao != 5)
 			ExibirItemFila(factory, "Resultados");
 			break;
 		case 4:
+			EnviaParamentroFila(factory, "Parametros");
+			break;
+		case 5:
 			Console.Clear();
 			break;
 
@@ -64,13 +67,49 @@ void EnviarItemFila(ConnectionFactory factory, string fila)
 			RegraId = 1
 		};
 		var message = JsonSerializer.Serialize(novoItemProcessar);
-		SendMessageToQueue(factory, message, "Processar");
+		SendMessageToQueue(factory, message, fila);
 	}
 	else
 	{
 		Console.WriteLine("Id invalido");
 	}
 }
+
+void EnviaParamentroFila(ConnectionFactory factory, string fila)
+{
+	var opcao = 0;
+	Console.WriteLine();
+	Console.Write("Id da simulacao: ");
+	var opcaoEntrada = Console.ReadLine();
+	if (!string.IsNullOrEmpty(opcaoEntrada))
+	{
+		try
+		{
+			opcao = int.Parse(opcaoEntrada);
+		}
+		catch
+		{
+
+			opcao = 0;
+		}
+	}
+	if (opcao != 0)
+	{
+
+		var novoItemParametro = new ItemParametro
+		{
+			SimulacaoId = opcao,
+			PropA = "",
+			PropB = ""
+		};
+		SendMessageToQueue(factory, novoItemParametro.Serializa(), fila);
+	}
+	else
+	{
+		Console.WriteLine("Id invalido");
+	}
+}
+
 void ExibirItemFila(ConnectionFactory factory, string fila)
 {
 	using var connectionConsumer = factory.CreateConnection();
@@ -130,8 +169,9 @@ int ExibeMenu()
 	Console.WriteLine("1 - Enviar item para Fila. \n");
 	Console.WriteLine("2 - Ler todos os itens fila. \n");
 	Console.WriteLine("3 - Ler primeiro Item fila. \n");
-	Console.WriteLine("4 - Limpar Tela. \n");
-	Console.WriteLine("5 - Sair. \n");
+	Console.WriteLine("4 - envia parametro fila \n");
+	Console.WriteLine("5 - Limpar Tela. \n");
+	Console.WriteLine("6 - Sair. \n");
 	Console.Write("Escolha uma opção: \n");
 	var opcaoEntrada = Console.ReadLine();
 	try
